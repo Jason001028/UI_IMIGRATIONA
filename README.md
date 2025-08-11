@@ -78,6 +78,11 @@
 
 详细的迁移计划和开发指引请参考 [MIGRATION_PLAN.md](./MIGRATION_PLAN.md)。
 
+## 项目总体架构图
+
+<img width="2966" height="3846" alt="Untitled diagram _ Mermaid Chart-2025-08-11-020056" src="https://github.com/user-attachments/assets/13e0f372-0eb6-4544-b67d-c4d56355a4b1" />
+
+
 ## 🤝 贡献
 
 我们欢迎任何形式的贡献！如果您有好的想法或发现了 Bug，请随时提交 Pull Request 或创建 Issue。
