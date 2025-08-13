@@ -55,67 +55,59 @@
 
 ### **阶段 B: `index.html` (文件上传与分析) 迁移**
 
-**Prompt B.1: 创建 `DocumentUpload` 组件骨架与路由**
+**Prompt B.1: 在 `DocumentUpload` 组件中实现 UI 布局**
 
-**目标**: 搭建 `index.html` 对应 React 组件的基础文件，并配置路由。
+**目标**: 基于 `index.html` 的布局，在现有的 `DocumentUpload.tsx` 组件中构建文件上传的用户界面。
 
 **Prompt**:
-"现在我们开始迁移 `index.html`。
+"我们继续 `index.html` 的迁移。文件 `contract-analysis-frontend/src/components/DocumentUpload.tsx` 已经存在。
 **任务**:
-1.  **创建组件文件**: 在 `contract-analysis-frontend/src/components/` 目录下创建 `DocumentUpload.tsx` 和 `DocumentUpload.css` 文件。`DocumentUpload.tsx` 暂时只需包含一个返回 `<div>Contract Analysis System</div>` 的基础函数组件。
-2.  **配置路由**: 在 `contract-analysis-frontend/src/App.tsx` 中，为路径 `/` (根路径) 添加一条新的 `<Route>`，使其渲染 `DocumentUpload` 组件。
-3.  **样式迁移**: 将 `index.html` 中与文件上传区域 (`.upload-area`)、按钮 (`.btn-primary`)、加载动画 (`.loading`, `.spinner-border`) 等相关的通用 CSS 样式迁移到 `DocumentUpload.css`。
+1.  **查阅并迁移 HTML 结构**: 打开 `contract-analysis-system/contract-migration/templates/index.html`，将其文件上传区域 (`.upload-area`) 的核心 HTML 结构迁移到 `contract-analysis-frontend/src/components/DocumentUpload.tsx` 组件的 JSX 中。
+2.  **迁移基础样式**: 将 `index.html` 中与文件上传区域、按钮、加载动画等相关的 CSS 样式，合并到 `contract-analysis-frontend/src/components/DocumentUpload.css` 中。确保样式规则不与全局样式冲突。
+3.  **确认组件渲染**: 在 `contract-analysis-frontend/src/App.tsx` 中，确认根路径 `/` 的 `<Route>` 正确渲染 `DocumentUpload` 组件。
 
-**注意**: 在完成此步骤后，请使用 Cline 原生的文件阅读编辑功能检查 `contract-analysis-frontend/src/components/DocumentUpload.tsx`, `contract-analysis-frontend/src/components/DocumentUpload.css`, 和 `contract-analysis-frontend/src/App.tsx` 的内容，确保组件骨架和路由配置正确。
-
+**注意**: 此阶段只关注静态 UI 的搭建，暂时不需要实现任何交互逻辑。完成后，请检查页面是否能正确渲染出文件上传的表单和按钮。
 "
 
 **Prompt B.2: 实现文件上传与分析 API 交互**
 
-**目标**: 实现 `DocumentUpload` 组件中的文件选择、拖放、表单提交以及与后端 `/analysis/analyze` API 的交互。
+**目标**: 为 `DocumentUpload` 组件添加状态管理和交互逻辑，实现文件选择、拖放，并调用后端 API 进行分析。
 
 **Prompt**:
-"我们来为 `DocumentUpload` 组件实现文件上传和分析功能。
+"现在为 `DocumentUpload` 组件添加交互功能。
 **任务**:
-1.  **状态管理**: 在 `DocumentUpload.tsx` 中，使用 `useState` 管理以下状态：
-    *   `costModelFile`, `leaseContractFiles`, `miscFiles`, `originalContractsFiles` (用于存储选中的文件)。
-    *   `isLoading` (表示分析是否正在进行)。
-    *   `analysisResult` (存储 `AnalysisResult` 类型的数据)。
-    *   `error` (存储错误信息)。
-    *   `loadingMessage` (用于显示动态加载消息)。
-2.  **文件处理逻辑**:
-    *   实现 `updateCostModelFileList`, `updateLeaseContractFileList`, `updateMiscFileList`, `updateOriginalContractsFileList` 等函数，用于更新文件列表的显示和内部状态。
-    *   实现 `setupDragAndDrop` 函数，处理文件拖放事件。
-    *   绑定文件输入框的 `change` 事件和浏览按钮的 `click` 事件。
-3.  **表单提交**:
-    *   实现 `handleSubmit` 函数，处理表单提交事件。
-    *   在提交时，构建 `FormData` 对象，将所有选中的文件和 `analysis_type` (始终为 `['lease', 'buyback', 'dealer']`) 添加到其中。
-    *   调用 `api.uploadAndAnalyze(formData)` 函数。
-    *   在请求期间显示加载动画和动态加载消息，并在请求完成后隐藏。
-    *   处理 API 响应，更新 `analysisResult` 或 `error` 状态。
-4.  **UI 渲染**:
-    *   将 `index.html` 中的文件上传区域 (`upload-area`) 结构迁移到 `DocumentUpload.tsx`。
-    *   根据 `isLoading` 状态显示或隐藏加载动画。
-    *   暂时不渲染分析结果，只确保文件上传和 API 交互逻辑正确。
+1.  **查阅 API 和类型定义 (关键步骤)**: 首先，仔细阅读 `src/services/api.ts` 和 `src/services/types.ts`，以完全理解 `uploadAndAnalyze` 函数的签名、其期望的 `FormData` 结构，以及它返回的 `AnalysisResult` 类型的具体字段。这是实现后续逻辑的基础。
+2.  **状态管理**: 在 `DocumentUpload.tsx` 中，使用 `useState` 管理以下状态：
+    *   `costModelFile`, `leaseContractFiles`, `miscFiles`, `originalContractsFiles` (用于存储选中的文件对象)。
+    *   `isLoading` (布尔值，表示分析是否正在进行)。
+    *   `analysisResult` (用于存储 API 返回的 `AnalysisResult` 类型的数据)。
+    *   `error` (用于存储错误信息)。
+3.  **实现文件处理与表单提交**:
+    *   实现处理文件选择、文件列表更新和文件拖放的函数。
+    *   实现 `handleSubmit` 函数。在此函数中，构建一个 `FormData` 对象，将所有文件和 `analysis_type` (固定为 `['lease', 'buyback', 'dealer']`) 添加进去。
+    *   调用在 `api.ts` 中定义的 `uploadAndAnalyze(formData)` 函数。
+    *   在请求期间，设置 `isLoading`为 `true` 以显示加载指示器；请求结束后，根据结果更新 `analysisResult` 或 `error` 状态，并设置 `isLoading` 为 `false`。
+4.  **UI 联动**: 根据 `isLoading` 状态，条件渲染加载动画 (`.spinner-border`)。
 
-**注意**: 在完成此步骤后，请使用 Cline 原生的文件阅读编辑功能检查 `contract-analysis-frontend/src/components/DocumentUpload.tsx` 的内容，确保文件上传、拖放和 API 交互逻辑正确无误。
-
+**注意**: 完成后，请检查文件选择、拖放功能是否正常，以及提交表单时是否能正确调用 API 并更新组件状态。
 "
 
-**Prompt B.3: 整合分析结果展示**
+**Prompt B.3: 整合 `AnalysisResultDisplay` 组件以展示结果**
 
-**目标**: 在 `DocumentUpload` 组件中整合 `AnalysisResultDisplay` 组件，以显示分析结果。
+**目标**: 在 `DocumentUpload` 组件中，使用已有的 `AnalysisResultDisplay` 通用组件来显示分析结果。
 
 **Prompt**:
-"现在我们将 `AnalysisResultDisplay` 组件整合到 `DocumentUpload` 中，以显示分析结果。
+"最后一步是将分析结果展示出来。我们将复用在 **阶段 A.2** 中创建的 `AnalysisResultDisplay` 组件。
 **任务**:
-1.  **导入并使用 `AnalysisResultDisplay`**: 在 `DocumentUpload.tsx` 中导入 `AnalysisResultDisplay` 组件。
-2.  **条件渲染**: 当 `analysisResult` 状态有数据时，条件渲染 `AnalysisResultDisplay` 组件，并将 `analysisResult.analysis_response` 和 `analysisResult.uploaded_files` 作为 props 传递。
-3.  **处理 `navigateToViewer`**: 确保 `AnalysisResultDisplay` 中 `navigateToViewer` 函数所需的 `window.hashToFilename`, `window.hash_to_s3_key`, `window.highlight_doc_options` 等数据在 `DocumentUpload` 组件中被正确初始化，并作为 props 传递给 `AnalysisResultDisplay`，或者通过上下文（Context API）提供。
-4.  **清理旧结果**: 在每次新的分析开始前，清除旧的 `analysisResult` 状态，以确保页面显示的是最新结果。
+1.  **导入并使用通用组件**: 在 `DocumentUpload.tsx` 中导入 `AnalysisResultDisplay` 组件。
+2.  **条件渲染**: 当 `analysisResult` 状态中包含有效数据时，渲染 `<AnalysisResultDisplay />` 组件。
+3.  **传递 Props**:
+    *   回顾 `AnalysisResultDisplay` 组件所需的 props（`analysisData` 和 `uploadedFiles`）。
+    *   将 `DocumentUpload` 组件 state 中的 `analysisResult.analysis_response` 和 `analysisResult.uploaded_files` 作为 props 传递给 `AnalysisResultDisplay`。
+4.  **处理 `navigateToViewer` 逻辑**: 确保 `AnalysisResultDisplay` 内部的 `navigateToViewer` 函数能够正常工作。在 `DocumentUpload` 组件中，从 `analysisResult.uploaded_files` 初始化 `window.hashToFilename`, `window.hash_to_s3_key` 等全局变量，或将这些数据和导航逻辑作为 props 传递给 `AnalysisResultDisplay`。
+5.  **清理旧结果**: 在每次发起新的分析请求前，确保清空上一次的 `analysisResult` 和 `error` 状态，以避免显示过时的信息。
 
-**注意**: 在完成此步骤后，请使用 Cline 原生的文件阅读编辑功能检查 `contract-analysis-frontend/src/components/DocumentUpload.tsx` 的内容，确保分析结果能够正确显示。
-
+**注意**: 完成后，请进行一次完整的文件上传和分析流程，确认分析结果能通过 `AnalysisResultDisplay` 组件正确地显示在页面上。
 "
 
 ### **阶段 C: `results.html` (历史结果列表) 迁移**
@@ -142,19 +134,20 @@
 **Prompt**:
 "我们来为 `HistoricalResults` 组件实现历史结果列表的 API 交互、搜索和分页功能。
 **任务**:
-1.  **状态管理**: 在 `HistoricalResults.tsx` 中，使用 `useState` 管理以下状态：
+1.  **查阅 API 和类型定义 (关键步骤)**: 首先，仔细阅读 `src/services/api.ts` 和 `src/services/types.ts`，以完全理解 `getHistoricalResults` 函数的签名、其参数，以及它返回的 `PaginatedResults<AnalysisRecordDetails>` 类型的具体字段。这是实现后续逻辑的基础。
+2.  **状态管理**: 在 `HistoricalResults.tsx` 中，使用 `useState` 管理以下状态：
     *   `results` (存储 `PaginatedResults<AnalysisRecordDetails>` 类型的数据)。
     *   `currentPage`, `itemsPerPage` (用于分页)。
     *   `filenameSearch`, `dateFrom`, `dateTo` (用于搜索过滤)。
     *   `isLoading`, `error`。
-2.  **数据获取函数**: 实现 `loadResults(page: number)` 异步函数：
+3.  **数据获取函数**: 实现 `loadResults(page: number)` 异步函数：
     *   根据 `currentPage`, `itemsPerPage` 和搜索过滤条件 (`filenameSearch`, `dateFrom`, `dateTo`) 构建请求参数。
     *   调用 `api.getHistoricalResults()` 函数。
     *   处理 API 响应，更新 `results`, `isLoading`, `error` 状态。
-3.  **分页逻辑**: 实现 `updatePagination(currentPage: number, totalPages: number)` 函数，用于动态生成分页按钮。
-4.  **搜索表单**: 绑定搜索表单的 `submit` 事件和清除按钮的 `click` 事件，触发 `loadResults(1)`。
-5.  **初始加载**: 使用 `useEffect` Hook 在组件首次加载时调用 `loadResults(1)`。
-6.  **UI 渲染**:
+4.  **分页逻辑**: 实现 `updatePagination(currentPage: number, totalPages: number)` 函数，用于动态生成分页按钮。
+5.  **搜索表单**: 绑定搜索表单的 `submit` 事件和清除按钮的 `click` 事件，触发 `loadResults(1)`。
+6.  **初始加载**: 使用 `useEffect` Hook 在组件首次加载时调用 `loadResults(1)`。
+7.  **UI 渲染**:
     *   根据 `isLoading` 状态显示或隐藏加载动画。
     *   渲染表格骨架和分页容器，但暂时不填充数据。
 
@@ -203,14 +196,15 @@
 **Prompt**:
 "我们来为 `ResultDetail` 组件实现结果详情的数据获取功能。
 **任务**:
-1.  **状态管理**: 在 `ResultDetail.tsx` 中，使用 `useState` 管理以下状态：
+1.  **查阅 API 和类型定义 (关键步骤)**: 首先，仔细阅读 `src/services/api.ts` 和 `src/services/types.ts`，以完全理解 `getResultDetail` 函数的签名及其返回的数据结构。
+2.  **状态管理**: 在 `ResultDetail.tsx` 中，使用 `useState` 管理以下状态：
     *   `analysisData` (存储 `AnalysisResult['analysis_response']` 类型的数据)。
     *   `uploadedFiles` (存储 `AnalysisResult['uploaded_files']` 类型的数据)。
     *   `recordDetails` (存储 `AnalysisRecordDetails` 类型的数据)。
     *   `isLoading`, `error`。
-2.  **数据获取**: 使用 `useEffect` Hook 在组件首次加载时，通过 `useParams` 获取 `id`，然后调用 `api.getResultDetail(id)` 函数。
+3.  **数据获取**: 使用 `useEffect` Hook 在组件首次加载时，通过 `useParams` 获取 `id`，然后调用 `api.getResultDetail(id)` 函数。
     *   处理 API 响应，更新 `analysisData`, `uploadedFiles`, `recordDetails`, `isLoading`, `error` 状态。
-3.  **UI 渲染**:
+4.  **UI 渲染**:
     *   根据 `isLoading` 状态显示或隐藏加载动画。
     *   渲染 `Record Details` 卡片，显示 `filename` 和 `created_at`。
     *   暂时不渲染详细分析结果。
